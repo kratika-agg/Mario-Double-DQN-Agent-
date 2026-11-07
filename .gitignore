@@ -3,4 +3,4 @@ __pycache__/
 *.py[cod]
 .env
 .vscode/
-.DS_Store
+.DS_Storeg
