@@ -1,28 +1,43 @@
 Mario Double DQN Agent
 
-An implementation of a Mario-playing reinforcement learning agent using Deep Q-Networks (DQN) and the Double DQN approach.
+A reinforcement learning project that explores training an agent to play Super Mario Bros. using Double Deep Q-Networks (Double DQN) and PyTorch.
 
 Overview
 
-This project explores how reinforcement learning can be used to train an agent to interact with the Super Mario Bros. environment.
+The agent learns to interact with the Mario environment by observing game states, selecting actions, and learning from the rewards received.
 
-The agent observes the game environment, selects actions, and learns from the rewards received through interaction.
+The implementation uses a convolutional neural network to process visual observations and estimate action-value functions.
 
-Objectives
+Key Components
 
-* Understand reinforcement learning through a practical game environment.
-* Implement a Deep Q-Network using PyTorch.
-* Explore experience replay and target networks.
-* Develop a Double DQN-based learning approach.
+Component	Description
+Environment	Creates and preprocesses the Mario game environment.
+DQN Network	Uses convolutional layers to estimate Q-values.
+Replay Memory	Stores and samples past experiences.
+Mario Agent	Implements epsilon-greedy action selection.
+Configuration	Stores environment and training parameters.
+Training Module	Initializes networks, optimizer, and replay memory.
 
-Technologies
+Learning Approach
 
-* Python
+The project explores the following reinforcement learning concepts:
+
+* Experience Replay: Randomly samples stored experiences to improve learning stability.
+* Target Network: Maintains a separate network for target-value estimation.
+* Epsilon-Greedy Strategy: Balances exploration and exploitation.
+* Double DQN: Uses the online network to select the next action and the target network to evaluate it.
+
+Technology Stack
+
+* Python 3.11
 * PyTorch
+* Torchvision
 * OpenAI Gym
 * Gym Super Mario Bros.
+* NES-Py
 * NumPy
+* PyYAML
 
 Project Status
 
-Currently under development.
+Core components have been implemented and tested individually. The Double DQN optimization and complete training pipeline are under development.
