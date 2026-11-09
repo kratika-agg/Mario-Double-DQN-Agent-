@@ -78,10 +78,10 @@ class ResizeObservation(gym.ObservationWrapper):
         return observation
 
 
-def create_mario_env():
+def create_mario_env(render_mode="rgb"):
     env = gym_super_mario_bros.make(
         "SuperMarioBros-1-1-v0",
-        render_mode="rgb",
+        render_mode=render_mode,
         apply_api_compatibility=True
     )
 
