@@ -145,3 +145,133 @@ def optimize_model():
 
     # Return loss value
     return loss.item()    
+
+
+def train():
+
+    # Create the Mario environment
+    env = create_mario_env()
+
+    # Initialize the agent
+    agent = MarioAgent(
+        policy_net,
+        config["num_actions"],
+        device=device
+    )
+
+    # Initialize epsilon for exploration
+    epsilon = config["epsilon_start"]
+
+    # Load training parameters
+    epsilon_end = config["epsilon_end"]
+    epsilon_decay = config["epsilon_decay"]
+    num_episodes = config["num_episodes"]
+    max_steps = config["max_steps_per_episode"]
+
+    # Track total environment steps
+    global_steps = 0
+
+    # Store rewards from all episodes
+    episode_rewards = []
+
+    try:
+
+        # Run training episodes
+        for episode in range(num_episodes):
+
+            # Reset environment at the beginning of each episode
+            state, info = env.reset()
+
+            # Initialize episode reward
+            total_reward = 0
+            episode_losses = []
+
+            # Run one episode
+            for step in range(max_steps):
+
+                # Select action using epsilon-greedy strategy
+                action = agent.select_action(state, epsilon)
+
+                # Perform action in the environment
+                next_state, reward, terminated, truncated, info = env.step(action)
+
+                # Determine whether the environment has ended the episode
+                done = terminated or truncated
+
+                # Check whether our own step limit has been reached
+                time_limit_reached = step == max_steps - 1
+
+                # Determine whether to stop the episode
+                episode_done = done or time_limit_reached
+
+                # Store the experience
+                memory.push(
+                    state,
+                    action,
+                    None if terminated else next_state,
+                    reward,
+                    terminated
+                )
+
+                # Update current state
+                state = next_state
+
+                # Accumulate episode reward
+                total_reward += reward
+
+                # Optimize policy network
+                loss = optimize_model()
+                if loss is not None:
+                    episode_losses.append(loss)
+
+                # Count environment steps
+                global_steps += 1
+
+                # Periodically synchronize target network
+                if global_steps % TARGET_UPDATE == 0:
+                    target_net.load_state_dict(
+                        policy_net.state_dict()
+                    )
+                    target_net.eval()
+                # Stop episode if it has ended
+                if episode_done:
+                    break
+
+            # Store episode reward
+            episode_rewards.append(total_reward)
+
+            # Decay epsilon after each episode
+            epsilon = max(
+                epsilon_end,
+                epsilon * epsilon_decay
+            )
+
+            avg_loss = (
+                sum(episode_losses) / len(episode_losses)
+                if episode_losses else 0
+            )
+            # Display episode progress
+            print(
+                f"Episode: {episode + 1}/{num_episodes} | "
+                f"Reward: {total_reward:.2f} | "
+                f"Epsilon: {epsilon:.4f} | "
+                f"Steps: {global_steps} | "
+                f"Average Loss: {avg_loss:.4f} | "
+            )
+
+    finally:
+        # Close the environment
+        env.close()
+
+    # Save trained policy network
+    torch.save(
+        policy_net.state_dict(),
+        "mario_double_dqn.pth"
+    )
+
+    print("Training completed!")
+    print("Model saved successfully!")
+
+
+if __name__ == "__main__":
+    train()
