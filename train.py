@@ -3,6 +3,8 @@ import torch
 import torch.optim as optim
 import yaml
 import torch.nn as nn
+from environment import create_mario_env
+from agent import MarioAgent
 
 
 from dqn import DQN
