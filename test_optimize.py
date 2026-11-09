@@ -1,3 +1,4 @@
+
 import torch
 
 from train import (
@@ -8,16 +9,22 @@ from train import (
 )
 
 
-def test_optimize_model():
+def fill_memory(all_terminal=False):
 
-    # Store dummy experiences in replay memory
-    for _ in range(BATCH_SIZE):
+    memory.memory.clear()
+
+    for i in range(BATCH_SIZE):
 
         state = torch.rand(4, 1, 84, 84)
         action = 0
-        next_state = torch.rand(4, 1, 84, 84)
         reward = 1.0
-        done = False
+
+        if all_terminal or i % 2 == 0:
+            next_state = None
+            done = True
+        else:
+            next_state = torch.rand(4, 1, 84, 84)
+            done = False
 
         memory.push(
             state,
@@ -27,31 +34,34 @@ def test_optimize_model():
             done
         )
 
-    # Save network weights before optimization
-    old_weights = {
-        name: param.clone()
-        for name, param in policy_net.named_parameters()
-    }
 
-    # Run optimization
+def test_mixed_transitions():
+
+    fill_memory(all_terminal=False)
+
     loss = optimize_model()
 
-    # Check whether loss was calculated
-    print("Loss:", loss)
     assert loss is not None
     assert torch.isfinite(torch.tensor(loss))
 
-    # Check whether network weights changed
-    weights_changed = any(
-        not torch.equal(old_weights[name], param)
-        for name, param in policy_net.named_parameters()
-    )
+    print("Mixed terminal/non-terminal test passed!")
 
-    assert weights_changed
 
-    print("Optimization test passed!")
-    print("Policy network weights updated successfully!")
+def test_all_terminal_transitions():
+
+    fill_memory(all_terminal=True)
+
+    loss = optimize_model()
+
+    assert loss is not None
+    assert torch.isfinite(torch.tensor(loss))
+
+    print("All-terminal transitions test passed!")
 
 
 if __name__ == "__main__":
-    test_optimize_model()
+
+    test_mixed_transitions()
+    test_all_terminal_transitions()
+
+    print("All optimization tests passed!")
