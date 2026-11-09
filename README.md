@@ -1,118 +1,100 @@
-Mario Double DQN Agent
+# Mario Double DQN Agent
 
-A reinforcement learning implementation of a Mario-playing agent using Double Deep Q-Networks (Double DQN), PyTorch, and the Super Mario Bros. environment.
+An implementation of a **Double Deep Q-Network (Double DQN)** agent designed to learn to play Super Mario Bros using Deep Reinforcement Learning and Convolutional Neural Networks.
 
-Overview
+## Project Overview
 
-This project explores how an autonomous agent can learn to play Super Mario Bros. through reinforcement learning.
+This project focuses on developing an intelligent agent that learns to interact with the Super Mario Bros environment through reinforcement learning.
 
-The agent processes visual observations from the game, selects actions using an epsilon-greedy policy, and learns from collected experiences.
+The agent uses visual observations of the game environment to estimate action values and make decisions.
 
-A convolutional neural network estimates action-value functions, while the Double DQN approach separates next-action selection from next-action evaluation to help reduce overestimation bias.
+The implementation is based on Double DQN, which uses separate online and target networks to improve the stability of Q-learning.
 
-Architecture
+## Tech Stack
 
-The project consists of the following components:
+- Python
+- PyTorch
+- NumPy
+- OpenAI Gym
+- Gym Super Mario Bros
+- TorchVision
+- TensorDict
+- TorchRL
+- PyYAML
 
-Module	Responsibility
-environment.py	Environment creation, frame skipping, grayscale conversion, resizing, and frame stacking.
-dqn.py	Convolutional neural network for Q-value estimation.
-agent.py	Epsilon-greedy action selection.
-experience_replay.py	Experience storage and random sampling.
-parameters.yaml	Environment and training configuration.
-train.py	Network, optimizer, and replay memory initialization, with training logic under development.
+## Project Architecture
 
-Reinforcement Learning Concepts
+The project is organized into modular components:
 
-1. Deep Q-Network (DQN)
+| File | Responsibility |
+|---|---|
+| `environment.py` | Creates and preprocesses the Mario environment |
+| `dqn.py` | Defines the CNN-based Q-network |
+| `experience_replay.py` | Implements experience replay memory |
+| `agent.py` | Handles action selection using epsilon-greedy policy |
+| `parameters.yaml` | Stores configurable hyperparameters |
+| `train.py` | Initializes training components and implements the optimization step |
 
-A convolutional neural network processes game observations and estimates Q-values for available actions.
+## Implemented Components
 
-2. Experience Replay
+### 1. Environment Setup and Preprocessing
 
-Transitions are stored in a replay buffer and sampled randomly to reduce correlations between consecutive experiences.
+- Initialized the Super Mario Bros environment.
+- Restricted the action space to two actions: moving right and jumping right.
+- Implemented frame skipping to reduce computational overhead.
+- Converted observations into grayscale.
+- Resized frames to 84 × 84.
+- Applied frame stacking to provide temporal information to the agent.
 
-3. Target Network
+### 2. Deep Q-Network
 
-A separate target network is maintained to provide more stable target-value estimates.
+Implemented a Convolutional Neural Network using PyTorch.
 
-4. Epsilon-Greedy Strategy
+The network processes visual observations and predicts Q-values for the available actions.
 
-The agent balances exploration and exploitation by selecting random actions with probability epsilon and predicted best actions otherwise.
+### 3. Experience Replay
 
-5. Double DQN
+Implemented replay memory using Python's `deque`.
 
-The online network selects the next action, while the target network evaluates that action.
+It stores transitions containing:
 
-This separation helps reduce the overestimation of action values.
+- Current state
+- Action
+- Next state
+- Reward
+- Terminal flag
 
-Environment Processing
+Random sampling is used to obtain batches of experiences for training.
 
-The game observations are processed through the following pipeline:
+### 4. Agent and Action Selection
 
-1. Frame skipping
-2. Grayscale conversion
-3. Image resizing to 84 × 84
-4. Stacking four consecutive frames
+Implemented an epsilon-greedy action selection strategy.
 
-The resulting state provides visual and temporal information to the neural network.
+- Exploration: Selects a random action.
+- Exploitation: Selects the action with the highest predicted Q-value.
 
-Technology Stack
+### 5. Configuration Management
 
-* Python 3.11
-* PyTorch
-* Torchvision
-* NumPy
-* OpenAI Gym
-* Gym Super Mario Bros.
-* NES-Py
-* PyYAML
+Training parameters are maintained separately in `parameters.yaml`, making it easier to modify hyperparameters without changing the implementation.
 
-Setup and Installation
+## Current Development Status
 
-Clone the repository:
+- [x] Environment setup and preprocessing
+- [x] CNN-based Q-network
+- [x] Experience replay memory
+- [x] Epsilon-greedy action selection
+- [x] Configuration management
+- [x] Online and target network initialization
+- [x] Double DQN optimization step
+- [ ] Complete training loop
+- [ ] Periodic target network updates
+- [ ] Model checkpointing
+- [ ] Training evaluation and performance analysis
 
-git clone https://github.com/kratika-agg/Mario-Double-DQN-Agent-.git
-cd Mario-Double-DQN-Agent-
+## Project Goal
 
-Create a virtual environment:
+Build and evaluate a Double DQN agent capable of learning effective gameplay strategies through interaction with the Super Mario Bros environment.
 
-py -3.11 -m venv .venv
+---
 
-Activate it on Windows PowerShell:
-
-.\.venv\Scripts\Activate.ps1
-
-Install the required packages:
-
-pip install torch==2.2.2 torchvision==0.17.2 numpy==1.26.4
-pip install gym==0.26.2 gym-super-mario-bros==7.4.0 nes-py==8.2.1
-pip install tensordict==0.3.0 torchrl==0.3.0 pyyaml
-
-Configuration
-
-Training and environment parameters are maintained in parameters.yaml, including:
-
-* Environment identifier
-* Number of available actions
-* Replay memory capacity
-* Batch size
-* Learning rate
-* Discount factor
-* Target network update frequency
-* Exploration parameters
-* Episode settings
-
-Project Status
-
-The environment, neural network, replay memory, agent, and configuration modules have been implemented and tested individually.
-
-The training initialization is in place. Double DQN optimization and the complete training pipeline are currently under development.
-
-Future Work
-
-* Complete the Double DQN optimization function.
-* Implement the complete training loop.
-* Add model checkpointing.
-* Evaluate agent performance across episodes.
-* Analyze training rewards and learning progress.
+**Status:** Under Development
