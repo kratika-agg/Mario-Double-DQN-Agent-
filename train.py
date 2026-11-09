@@ -5,7 +5,8 @@ import yaml
 import torch.nn as nn
 from environment import create_mario_env
 from agent import MarioAgent
-
+import csv
+import matplotlib.pyplot as plt
 
 from dqn import DQN
 from experience_replay import ReplayMemory
@@ -183,6 +184,18 @@ def train():
     # Store rewards from all episodes
     episode_rewards = []
 
+
+    with open("training_metrics.csv", "w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow([
+            "Episode",
+            "Reward",
+            "Average Reward (100)",
+            "Average Loss",
+            "Epsilon",
+            "Global Steps"
+        ])
+
     try:
 
         # Run training episodes
@@ -253,7 +266,10 @@ def train():
 
             # Store episode reward
             episode_rewards.append(total_reward)
-
+            
+            avg_reward = sum(
+                episode_rewards[-100:]
+            ) / len(episode_rewards[-100:])
             # Decay epsilon after each episode
             epsilon = max(
                 epsilon_end,
@@ -264,6 +280,20 @@ def train():
                 sum(episode_losses) / len(episode_losses)
                 if episode_losses else 0
             )
+
+            
+
+            with open("training_metrics.csv", "a", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerow([
+                    episode + 1,
+                    total_reward,
+                    avg_reward,
+                    avg_loss,
+                    epsilon,
+                    global_steps
+                ])
+
             # Display episode progress
             print(
                 f"Episode: {episode + 1}/{num_episodes} | "
@@ -289,3 +319,4 @@ def train():
 
 if __name__ == "__main__":
     train()
+
