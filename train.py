@@ -2,6 +2,8 @@
 import torch
 import torch.optim as optim
 import yaml
+import torch.nn as nn
+
 
 from dqn import DQN
 from experience_replay import ReplayMemory
@@ -58,3 +60,86 @@ print("Training components initialized successfully!")
 print("Device:", device)
 print("Batch size:", BATCH_SIZE)
 print("Learning rate:", config["learning_rate"])
+
+def optimize_model():
+
+    # Check if enough experiences are available
+    if len(memory) < BATCH_SIZE:
+        return None
+    #we need 32 smaples but if less exit fnc and return none without performing update    
+
+    # Sample random experiences from replay memory
+    transitions = memory.sample(BATCH_SIZE)
+
+    # Convert experiences into a batch
+    batch = list(zip(*transitions))
+
+    # Extract states, actions, next states, rewards and done flags
+    states = torch.stack(batch[0]).to(device)
+    actions = torch.tensor(batch[1], dtype=torch.long, device=device)
+    rewards = torch.tensor(batch[3], dtype=torch.float32, device=device)
+    dones = torch.tensor(batch[4], dtype=torch.bool, device=device)
+
+    # Predict Q-values for the current states
+    current_q_values = policy_net(states)
+
+    # Select Q-values corresponding to actions actually taken
+    current_q_values = current_q_values.gather(
+        1, actions.unsqueeze(1)
+    ).squeeze(1)
+    # Initialize next-state values with zeros
+    next_state_values = torch.zeros(BATCH_SIZE, device=device)
+
+    # Identify experiences where the episode has not ended
+    non_final_mask = ~dones
+
+    # Get next states only for non-terminal experiences
+    if non_final_mask.any():
+
+        next_states = torch.stack([
+            transition.next_state
+            for transition, is_non_final
+            in zip(transitions, non_final_mask)
+            if is_non_final
+        ]).to(device)    
+
+        # Online network selects the best next action
+        with torch.no_grad():
+
+            next_actions = policy_net(next_states).argmax(
+                dim=1, keepdim=True
+            )
+
+            # Target network evaluates the selected actions
+            next_q_values = target_net(next_states).gather(
+                1, next_actions
+            ).squeeze(1)
+
+            # Store the calculated future Q-values
+            next_state_values[non_final_mask] = next_q_values
+
+    # Calculate expected Q-values using Bellman equation
+    expected_q_values = rewards + (GAMMA * next_state_values)
+
+    # Calculate loss
+    loss = nn.SmoothL1Loss()(
+        current_q_values,
+        expected_q_values
+    )
+
+    # Clear previous gradients
+    optimizer.zero_grad()
+
+    # Calculate gradients using backpropagation
+    loss.backward()
+
+    # Clip gradients to prevent excessively large updates
+    torch.nn.utils.clip_grad_value_(
+        policy_net.parameters(), 100
+    )#Limits individual gradients to the range -100 to 100.
+
+    # Update online network weights
+    optimizer.step()
+
+    # Return loss value
+    return loss.item()    
