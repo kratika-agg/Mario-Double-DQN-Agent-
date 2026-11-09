@@ -63,6 +63,12 @@ print("Device:", device)
 print("Batch size:", BATCH_SIZE)
 print("Learning rate:", config["learning_rate"])
 
+def convert_state(state):
+    return torch.stack([
+        frame.squeeze(0) if frame.ndim == 3 else frame
+        for frame in state
+    ]).float()
+
 def optimize_model():
 
     # Check if enough experiences are available
@@ -121,7 +127,10 @@ def optimize_model():
             next_state_values[non_final_mask] = next_q_values
 
     # Calculate expected Q-values using Bellman equation
-    expected_q_values = rewards + (GAMMA * next_state_values)
+    expected_q_values = rewards + (
+        GAMMA * next_state_values * (~dones).float()
+    )
+
 
     # Calculate loss
     loss = nn.SmoothL1Loss()(
@@ -182,6 +191,8 @@ def train():
             # Reset environment at the beginning of each episode
             state, info = env.reset()
 
+            state = convert_state(state)
+
             # Initialize episode reward
             total_reward = 0
             episode_losses = []
@@ -194,6 +205,9 @@ def train():
 
                 # Perform action in the environment
                 next_state, reward, terminated, truncated, info = env.step(action)
+
+                # Convert LazyFrames observations into PyTorch tensors
+                next_state = convert_state(next_state)
 
                 # Determine whether the environment has ended the episode
                 done = terminated or truncated
