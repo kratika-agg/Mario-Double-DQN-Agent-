@@ -23,5 +23,5 @@ epsilon_end: 0.01
 epsilon_decay: 0.995
 
 # Episode settings
-num_episodes: 10000
-max_steps_per_episode: 10000
+num_episodes: 100
+max_steps_per_episode: 1000
