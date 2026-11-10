@@ -1,4 +1,3 @@
-
 import torch
 import yaml
 
@@ -51,6 +50,47 @@ def convert_state(state):
         for frame in state
     ]).float()
 
+def enable_fullscreen(env):
+
+    current_env = env
+
+    print("\n--- Environment Wrapper Chain ---")
+
+    while True:
+        print(type(current_env))
+
+        if hasattr(current_env, "viewer"):
+            print("Viewer found!")
+            print("Viewer:", current_env.viewer)
+
+            if current_env.viewer is not None:
+                current_env.viewer._window.set_fullscreen(True)
+                print("Fullscreen enabled!")
+                return
+
+        if not hasattr(current_env, "env"):
+            break
+
+        current_env = current_env.env
+
+    print("Viewer was not found in the wrapper chain.")
+    base_env = env.unwrapped
+
+    # Access the original NES environment
+    nes_env = base_env.env
+
+    # Access the Pyglet viewer
+    viewer = nes_env.viewer
+
+    # Enable fullscreen
+    viewer._window.set_fullscreen(True)
+    base_env = env.unwrapped
+
+    # Access the NES image viewer
+    viewer = base_env.viewer
+
+    # Enable fullscreen on the existing Pyglet window
+    viewer._window.set_fullscreen(True)
 
 def play():
 
@@ -59,6 +99,11 @@ def play():
     try:
         state, info = env.reset()
         state = convert_state(state)
+        # Create the rendering window
+        env.render()
+
+        # Enable fullscreen
+        enable_fullscreen(env)
 
         total_reward = 0
         steps = 0
@@ -88,7 +133,7 @@ def play():
 
     finally:
         env.close()
-
+        
 
 if __name__ == "__main__":
     play()
