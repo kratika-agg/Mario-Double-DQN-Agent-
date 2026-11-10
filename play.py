@@ -1,3 +1,12 @@
+
+"""
+play.py
+
+Loads the trained Double DQN model and evaluates its
+gameplay performance over multiple episodes.
+Supports fullscreen rendering through the Pyglet viewer.
+"""
+
 import torch
 import yaml
 
@@ -26,10 +35,7 @@ policy_net = DQN(
 
 # Load trained model weights
 policy_net.load_state_dict(
-    torch.load(
-        "mario_double_dqn.pth",
-        map_location=device
-    )
+    torch.load("mario_double_dqn_100ep.pth", map_location=device)
 )
 
 # Set network to evaluation mode
@@ -50,18 +56,14 @@ def convert_state(state):
         for frame in state
     ]).float()
 
+
 def enable_fullscreen(env):
 
     current_env = env
 
-    print("\n--- Environment Wrapper Chain ---")
-
     while True:
-        print(type(current_env))
 
         if hasattr(current_env, "viewer"):
-            print("Viewer found!")
-            print("Viewer:", current_env.viewer)
 
             if current_env.viewer is not None:
                 current_env.viewer._window.set_fullscreen(True)
@@ -73,67 +75,74 @@ def enable_fullscreen(env):
 
         current_env = current_env.env
 
-    print("Viewer was not found in the wrapper chain.")
-    base_env = env.unwrapped
+    raise RuntimeError("Could not find the Pyglet viewer.")
 
-    # Access the original NES environment
-    nes_env = base_env.env
-
-    # Access the Pyglet viewer
-    viewer = nes_env.viewer
-
-    # Enable fullscreen
-    viewer._window.set_fullscreen(True)
-    base_env = env.unwrapped
-
-    # Access the NES image viewer
-    viewer = base_env.viewer
-
-    # Enable fullscreen on the existing Pyglet window
-    viewer._window.set_fullscreen(True)
 
 def play():
 
     env = create_mario_env(render_mode="human")
 
     try:
-        state, info = env.reset()
-        state = convert_state(state)
-        # Create the rendering window
-        env.render()
 
-        # Enable fullscreen
-        enable_fullscreen(env)
-
-        total_reward = 0
-        steps = 0
+        num_episodes = 5
         max_steps = config["max_steps_per_episode"]
 
-        for step in range(max_steps):
+        for episode in range(1, num_episodes + 1):
 
-            # Select greedy action (no exploration)
-            action = agent.select_action(state, epsilon=0)
+            state, info = env.reset()
+            state = convert_state(state)
 
-            # Perform action
-            next_state, reward, terminated, truncated, info = env.step(action)
+            # Initialize fullscreen only once
+            if episode == 1:
+                env.render()
+                enable_fullscreen(env)
 
-            next_state = convert_state(next_state)
+            total_reward = 0
+            steps = 0
 
-            total_reward += reward
-            steps += 1
+            for step in range(max_steps):
 
-            state = next_state
+                # Greedy action selection
+                with torch.no_grad():
+                    action = agent.select_action(state, epsilon=0)
 
-            if terminated or truncated:
-                break
+                # Perform action
+                next_state, reward, terminated, truncated, info = env.step(action)
+                
+                next_state = convert_state(next_state)
 
-        print("Game finished!")
-        print("Total reward:", total_reward)
-        print("Total steps:", steps)
+                total_reward += reward
+                steps += 1
+
+                state = next_state
+
+                if terminated or truncated:
+                    break
+
+            # Identify episode termination reason
+            if terminated:
+                reason = "Terminated"
+
+            elif truncated:
+                reason = "Truncated"
+
+            else:
+                reason = "Maximum steps reached"
+
+            print(
+                f"Episode: {episode}/{num_episodes} | "
+                f"Reward: {total_reward:.2f} | "
+                f"Steps: {steps} | "
+                f"X Position: {info.get('x_pos', 0)} | "
+                f"Flag: {info.get('flag_get', False)} | "
+                f"Reason: {reason}"
+            )
+
+        print("\nEvaluation completed!")
 
     finally:
         env.close()
-        
+
 
 if __name__ == "__main__":
     play()
