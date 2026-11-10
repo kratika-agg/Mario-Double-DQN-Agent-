@@ -1,4 +1,4 @@
-
+#test_agent.py — verifies agent functionality.
 import torch
 
 from dqn import DQN

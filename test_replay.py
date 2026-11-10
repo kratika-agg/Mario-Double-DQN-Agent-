@@ -1,3 +1,4 @@
+test_replay.py — verifies replay memory.
 from experience_replay import ReplayMemory
 
 memory = ReplayMemory(capacity=5)

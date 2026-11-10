@@ -1,4 +1,8 @@
-
+"""
+Implements the training loop for the Mario Double DQN agent,
+including experience collection, optimization, reward tracking,
+and model checkpoint saving.
+"""
 import torch
 import torch.optim as optim
 import yaml
@@ -21,6 +25,10 @@ with open("parameters.yaml", "r") as file:
 device = torch.device(
     "cuda" if torch.cuda.is_available() else "cpu"
 )
+print(f"Using device: {device}")
+
+if device.type == "cuda":
+    print(f"GPU: {torch.cuda.get_device_name(0)}")
 
 
 # Initialize online network

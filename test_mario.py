@@ -1,4 +1,4 @@
-
+#test_mario.py — verifies Mario environment.
 from environment import create_mario_env
 
 env = create_mario_env()

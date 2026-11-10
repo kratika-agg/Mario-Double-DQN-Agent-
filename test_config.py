@@ -1,4 +1,4 @@
-
+#test_config.py — verifies configuration loading.
 import yaml
 
 # Open the YAML configuration file

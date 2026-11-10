@@ -1,4 +1,4 @@
-
+#test_optimize.py — verifies optimization logic.
 import torch
 
 from train import (
