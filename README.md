@@ -19,3 +19,35 @@ This project implements a Double DQN agent for the `SuperMarioBros-1-1-v0` envir
 - **Training Metrics:** Tracks episode rewards, average rewards, loss, epsilon, and global steps.
 - **Gameplay Evaluation:** Loads a trained checkpoint and evaluates the agent using greedy action selection.
 - **Training Visualization:** Generates reward and loss graphs to analyze learning behaviour.
+
+## Double DQN Architecture
+
+The agent follows the Double Deep Q-Network architecture, combining a policy network, a target network, and experience replay.
+
+### Learning Workflow
+
+1. **State Observation:** The agent receives the current game state as a stack of four preprocessed frames.
+2. **Action Selection:** The policy network predicts Q-values for available actions. The agent selects an action using an epsilon-greedy strategy.
+3. **Environment Interaction:** The selected action is performed in the Mario environment, producing the next state, reward, and termination information.
+4. **Experience Storage:** The transition is stored in replay memory.
+5. **Experience Sampling:** A mini-batch of transitions is sampled from replay memory.
+6. **Double DQN Optimization:** The policy network selects the best next action, while the target network evaluates that action.
+7. **Target Network Update:** The target network periodically copies the policy network's parameters.
+
+### Core Components
+
+| Component | Responsibility |
+|---|---|
+| Policy Network | Predicts Q-values and selects actions |
+| Target Network | Calculates target Q-values |
+| Replay Memory | Stores and samples past experiences |
+| Mario Agent | Implements epsilon-greedy action selection |
+| Environment | Provides game states, rewards, and transitions |
+
+### Double DQN Optimization
+
+Double DQN separates next-action selection from next-action evaluation:
+
+- The **policy network** selects the action with the highest predicted Q-value.
+- The **target network** evaluates the selected action.
+- The resulting target is used to calculate the loss and update the policy network.
