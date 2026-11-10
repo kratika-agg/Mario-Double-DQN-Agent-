@@ -1,246 +1,232 @@
-# 🍄 Mario Double DQN Agent
+# Mario Double DQN Agent
 
-An AI agent that learns to play **Super Mario Bros.** using Deep Reinforcement Learning and the Double Deep Q-Network (Double DQN) algorithm.
+An AI agent that learns to play **Super Mario Bros.** using Deep Reinforcement Learning and the **Double Deep Q-Network (Double DQN)** algorithm.
 
-The project implements a complete reinforcement learning pipeline, including environment preprocessing, experience replay, epsilon-greedy exploration, neural network optimization, and gameplay evaluation.
+The project uses PyTorch to train an agent that observes the game environment, selects actions, stores experiences, and improves its decision-making through repeated interactions.
 
-## 🚀 Project Overview
+## Project Overview
 
-The objective is to train an intelligent agent that learns to navigate the Super Mario Bros. environment by interacting with it, collecting rewards, and improving its action-selection policy.
+The agent uses a CNN-based Deep Q-Network to estimate Q-values for possible actions based on the current game state.
 
-The agent uses visual observations of the game as input and predicts Q-values for available actions.
+Double DQN improves upon standard DQN by separating action selection and action evaluation:
 
-## 🧠 Algorithm: Double DQN
+- **Policy Network:** Selects the best next action.
+- **Target Network:** Evaluates the selected action.
+- **Experience Replay:** Stores and samples past transitions for training.
+- **Epsilon-Greedy Strategy:** Balances exploration and exploitation.
 
-This project uses Double DQN to reduce the overestimation of action values commonly associated with traditional DQN.
+## Key Features
 
-It uses two neural networks:
+- Double DQN implementation using PyTorch
+- Experience Replay Memory
+- Separate Policy and Target Networks
+- Epsilon-Greedy action selection
+- Frame skipping and frame stacking
+- Grayscale image processing and resizing
+- Episode-based training
+- Training reward and loss tracking
+- CSV-based training metrics
+- Reward and loss visualization
+- Gameplay evaluation using a trained checkpoint
 
-- **Policy Network (Online Network):** Selects the best next action.
-- **Target Network:** Evaluates the selected action to calculate target Q-values.
-
-The networks are periodically synchronized during training.
-
-## 🏗️ Project Architecture
+## Project Structure
 
 ```text
 Mario_Double_DQN_Agent/
 │
-├── environment.py
-├── dqn.py
-├── agent.py
-├── experience_replay.py
-├── train.py
-├── play.py
-├── parameters.yaml
+├── environment.py          # Mario environment and preprocessing
+├── dqn.py                  # Deep Q-Network architecture
+├── experience_replay.py    # Experience Replay Memory
+├── agent.py                # Agent and action selection
+├── train.py                # Double DQN training pipeline
+├── play.py                 # Evaluate the trained agent
+├── plot_training.py        # Plot training rewards and loss
+├── parameters.yaml         # Hyperparameters and configurations
+│
+├── test_mario.py           # Environment testing
+├── test_replay.py          # Replay memory testing
+├── test_agent.py           # Agent testing
+├── test_config.py          # Configuration testing
+├── test_optimize.py        # Optimization testing
+│
 ├── README.md
 └── .gitignore
 ```
 
-### File Descriptions
+## Environment and State Preprocessing
 
-| File | Description |
+The Mario environment is created using `gym-super-mario-bros`.
+
+The observation preprocessing pipeline includes:
+
+1. **Joypad Space:** Restricts the available actions to moving right and moving right with the jump button.
+2. **Frame Skipping:** Repeats each selected action for 4 frames.
+3. **Grayscale Conversion:** Converts RGB observations into grayscale images.
+4. **Image Resizing:** Resizes observations to 84 × 84 pixels.
+5. **Frame Stacking:** Stacks 4 consecutive frames to provide temporal information.
+
+The final state representation has the shape:
+
+```text
+(4, 84, 84)
+```
+
+## Double DQN Training
+
+The training process follows these steps:
+
+1. Initialize the Mario environment, policy network, target network, and replay memory.
+2. Observe the current state.
+3. Select an action using the epsilon-greedy strategy.
+4. Execute the action and observe the next state and reward.
+5. Store the transition in replay memory.
+6. Sample a mini-batch of transitions.
+7. Calculate current Q-values using the policy network.
+8. Select next actions using the policy network.
+9. Evaluate selected next actions using the target network.
+10. Calculate the target Q-values and optimize the policy network.
+11. Periodically synchronize the target network.
+12. Repeat for multiple episodes.
+
+## Training Metrics
+
+The training script records the following metrics after every episode:
+
+| Metric | Description |
 |---|---|
-| `environment.py` | Creates and preprocesses the Mario environment |
-| `dqn.py` | Defines the Deep Q-Network architecture |
-| `agent.py` | Implements epsilon-greedy action selection |
-| `experience_replay.py` | Stores and samples past experiences |
-| `train.py` | Implements the Double DQN training pipeline |
-| `play.py` | Loads the saved model and evaluates gameplay |
-| `parameters.yaml` | Stores configurable training parameters |
+| Episode | Current training episode |
+| Reward | Total reward obtained |
+| Average Reward (100) | Average reward over the latest 100 episodes |
+| Average Loss | Average optimization loss during the episode |
+| Epsilon | Current exploration rate |
+| Global Steps | Total environment steps |
 
-## ⚙️ Technologies Used
+Metrics are stored in:
 
-- Python
-- PyTorch
-- OpenAI Gym
-- Gym Super Mario Bros
-- NumPy
-- YAML
-- Torchvision
+```text
+training_metrics.csv
+```
 
-## 🔄 Environment Preprocessing
+## Visualizing Training Performance
 
-The game environment is processed to make observations suitable for the neural network.
+Run the following command after training:
 
-The preprocessing pipeline includes:
+```bash
+python plot_training.py
+```
 
-1. Frame skipping to reduce computational overhead.
-2. Grayscale conversion to simplify visual input.
-3. Resizing frames to 84 × 84 pixels.
-4. Frame stacking to provide temporal information.
+The script generates two visualizations:
 
-The resulting observation contains four stacked grayscale frames.
+- `reward_curve.png` – Episode rewards and average reward over 100 episodes.
+- `training_loss.png` – Average training loss across episodes.
 
-## 🧠 Deep Q-Network Architecture
+These graphs help monitor training progress and optimization behaviour.
 
-The neural network uses a convolutional architecture to extract visual features from game observations.
+## Installation and Setup
 
-Architecture:
-
-- Convolutional layer: 32 filters, kernel size 8, stride 4.
-- Convolutional layer: 64 filters, kernel size 4, stride 2.
-- Convolutional layer: 64 filters, kernel size 3, stride 1.
-- Fully connected layer: 512 neurons.
-- Output layer: Q-values for available actions.
-
-ReLU activation functions are used between layers.
-
-## 🎮 Action Selection
-
-The agent uses an epsilon-greedy strategy:
-
-- With probability ε, it selects a random action to explore.
-- Otherwise, it selects the action with the highest predicted Q-value.
-
-Epsilon gradually decreases during training to shift from exploration towards exploitation.
-
-## 🗃️ Experience Replay
-
-The replay memory stores transitions containing:
-
-- Current state
-- Selected action
-- Next state
-- Reward
-- Terminal flag
-
-Random batches of experiences are sampled during optimization to improve learning stability and reduce correlations between consecutive observations.
-
-## ⚡ Double DQN Optimization
-
-The optimization pipeline includes:
-
-1. Sampling a batch from replay memory.
-2. Predicting current Q-values using the policy network.
-3. Selecting next actions using the policy network.
-4. Evaluating selected next actions using the target network.
-5. Calculating target Q-values using the Bellman equation.
-6. Computing Smooth L1 loss.
-7. Performing backpropagation.
-8. Applying gradient clipping.
-9. Updating policy network weights.
-
-The target network is periodically synchronized with the policy network.
-
-## 🛠️ Installation and Setup
-
-### 1. Clone the Repository
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/kratika-agg/Mario-Double-DQN-Agent-.git
 cd Mario-Double-DQN-Agent-
 ```
 
-### 2. Create a Virtual Environment
+### 2. Create a virtual environment
 
 ```bash
 python -m venv .venv
 ```
 
-### 3. Activate the Virtual Environment
-
-Windows PowerShell:
+### 3. Activate the environment (Windows PowerShell)
 
 ```powershell
-.venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 ```
 
-### 4. Install Dependencies
+### 4. Install dependencies
 
-Install the required packages:
+Install the compatible project dependencies in your virtual environment. The current tested setup uses:
 
-```bash
-pip install torch torchvision gym gym-super-mario-bros nes-py numpy pyyaml
-```
+- Python 3.11
+- PyTorch 2.2.2 (CPU)
+- Torchvision 0.17.2
+- NumPy 1.26.4
+- Gym
+- Gym Super Mario Bros.
+- Matplotlib
+- PyYAML
 
-Ensure your installed package versions are compatible with the environment implementation.
+For this legacy Mario environment, NumPy 1.26.4 is used for compatibility.
 
-## 🏋️ Training the Agent
-
-Configure training parameters in `parameters.yaml`.
-
-Important parameters include:
-
-| Parameter | Description |
-|---|---|
-| `memory_size` | Replay memory capacity |
-| `batch_size` | Number of sampled experiences |
-| `learning_rate` | Optimizer learning rate |
-| `gamma` | Discount factor |
-| `target_update` | Target network synchronization interval |
-| `epsilon_start` | Initial exploration rate |
-| `epsilon_end` | Minimum exploration rate |
-| `epsilon_decay` | Exploration decay factor |
-| `num_episodes` | Number of training episodes |
-| `max_steps_per_episode` | Maximum steps per episode |
-
-Start training:
+### 5. Run the training script
 
 ```bash
 python train.py
 ```
 
-The training script reports episode rewards, epsilon values, total steps, and average loss.
+Training parameters can be configured in `parameters.yaml`.
 
-After training, the policy network weights are saved to:
-
-```text
-mario_double_dqn.pth
-```
-
-## 🎯 Gameplay Evaluation
-
-To load the saved checkpoint and run the agent:
+### 6. Evaluate the trained agent
 
 ```bash
 python play.py
 ```
 
-The evaluation script:
+The evaluation script loads the saved model checkpoint and runs the agent using its learned policy.
 
-1. Loads the saved policy network weights.
-2. Initializes the Mario environment.
-3. Selects actions greedily using the highest predicted Q-value.
-4. Runs a gameplay episode.
-5. Reports total reward and number of steps.
+### 7. Generate training graphs
 
-The evaluation script uses epsilon = 0, meaning the agent does not perform random exploration.
+```bash
+python plot_training.py
+```
 
-**Note:** The current checkpoint was generated during a short smoke test. Meaningful gameplay performance requires extended training.
-
-## 📊 Current Implementation Status
+## Current Implementation Status
 
 - [x] Mario environment setup
-- [x] Grayscale and resize preprocessing
-- [x] Frame stacking
-- [x] Deep Q-Network architecture
-- [x] Policy and target networks
-- [x] Epsilon-greedy action selection
-- [x] Experience replay memory
+- [x] State preprocessing and frame stacking
+- [x] CNN-based DQN architecture
+- [x] Experience Replay Memory
 - [x] Double DQN optimization
-- [x] Terminal-state handling
-- [x] Episode-based training loop
+- [x] Episode-based training pipeline
+- [x] Target network synchronization
 - [x] Model checkpoint saving
-- [x] Gameplay evaluation script
-- [ ] Extended model training
-- [ ] Training performance analysis
-- [ ] Evaluation across multiple episodes
+- [x] Training metrics in CSV format
+- [x] Reward and loss visualization
+- [x] Basic gameplay evaluation pipeline
+- [ ] Extended training and performance evaluation
 
-## 🔮 Future Improvements
+## Current Testing
 
-- Train the agent over extended episodes.
-- Track and visualize episode rewards.
-- Analyze training loss and learning progress.
-- Evaluate performance across multiple episodes.
-- Improve training efficiency and checkpoint management.
+The training pipeline has successfully completed a smoke test using:
 
-## 👩‍💻 Author
+- Episodes: 2
+- Maximum steps per episode: 40
+- Total environment steps: 80
 
-**Kratika Agrawal**
+The test verified that the environment, training loop, model saving, CSV logging, and graph generation work together.
 
-GitHub: [kratika-agg](https://github.com/kratika-agg)
+This is an initial pipeline validation, not evidence of a fully trained or converged agent.
+
+## Technologies Used
+
+- Python
+- PyTorch
+- Torchvision
+- NumPy
+- OpenAI Gym
+- Gym Super Mario Bros.
+- Matplotlib
+- PyYAML
+- Git and GitHub
+
+## Future Improvements
+
+- Extended training and reward analysis
+- Evaluate agent performance over multiple episodes
+- Improve training efficiency
+- Analyze the effect of different hyperparameter configurations
 
 ---
 
-*Built as a hands-on Deep Reinforcement Learning project to understand and implement Double DQN using PyTorch.*
+**Project:** Mario Double DQN Agent  
+**Focus:** Deep Reinforcement Learning | Computer Vision | PyTorch
