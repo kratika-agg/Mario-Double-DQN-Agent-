@@ -4,7 +4,9 @@ __pycache__/
 .env
 .vscode/
 .DS_Store
+
+# Model checkpoints
 *.pth
-training_metrics.csv
-reward_curve.png
-training_loss.png
+
+# Training metrics
+training_metrics*.csv
