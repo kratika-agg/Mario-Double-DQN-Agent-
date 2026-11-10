@@ -46,7 +46,7 @@ plt.legend()
 plt.grid(True)
 
 plt.savefig("reward_curve.png")
-plt.close()
+plt.show()
 
 
 # Plot training loss
