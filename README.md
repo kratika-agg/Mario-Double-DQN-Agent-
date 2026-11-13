@@ -337,7 +337,7 @@ Neither model successfully completed the level during the reported evaluations.
 Through this project, I explored and implemented:
 
 - Reinforcement Learning fundamentals.
-- Deep Q-Networks and Double DQN.
+- Deep Q-Networks and Double Deep Q-Networks.
 - CNN-based visual state processing.
 - Experience Replay and Target Networks.
 - Epsilon-Greedy exploration.
