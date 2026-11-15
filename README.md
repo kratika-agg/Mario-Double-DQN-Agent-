@@ -56,7 +56,7 @@ It uses two neural networks:
 9. The predicted Q-values are updated using the loss between predicted and target values.
 10. The target network is periodically synchronized with the policy network.
 
-### Double DQN Target
+### Double Deep Q-learning Network Target
 
 The target value is calculated as:
 
