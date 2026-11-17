@@ -18,7 +18,7 @@ Two training experiments were conducted:
 
 After evaluation, the 100-episode model was selected as the final checkpoint because it achieved better results in the tested environment.
 
-## Key Features and Components
+## Key Features
 
 - Double Deep Q-Network (Double DQN) implementation.
 - Convolutional Neural Network (CNN) for visual state processing.
