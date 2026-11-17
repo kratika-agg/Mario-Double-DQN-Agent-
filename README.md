@@ -34,7 +34,7 @@ After evaluation, the 100-episode model was selected as the final checkpoint bec
 
 ---
 
-## Double DeepQN Architecture
+## Double DQN Architecture
 
 Double DQN is an extension of Deep Q-Network (DQN) designed to reduce the overestimation of action values.
 
