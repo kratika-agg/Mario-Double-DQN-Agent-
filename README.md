@@ -75,7 +75,7 @@ Where:
 
 For terminal transitions, the future Q-value contribution is zero.
 
-### Core Components and their Description 
+### Core Components
 
 | Component | Description |
 |---|---|
