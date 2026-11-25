@@ -113,7 +113,7 @@ The agent uses two available actions:
 
 ---
 
-## Project Structure
+## Project Structure and Architecture
 
 ```text
 Mario-Double-DQN-Agent/
