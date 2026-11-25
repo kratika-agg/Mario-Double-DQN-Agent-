@@ -43,7 +43,7 @@ It uses two neural networks:
 1. **Policy Network:** Predicts Q-values and selects the best next action.
 2. **Target Network:** Evaluates the Q-value of the action selected by the policy network.
 
-### Learning Workflow
+### Learning Workflow and Summmary
 
 1. The agent receives the current game state.
 2. The policy network predicts Q-values for all available actions.
